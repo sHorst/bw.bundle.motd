@@ -1,25 +1,39 @@
 from pyfiglet import Figlet
 
-f = Figlet(width=120)
-figlet = f.renderText(node.hostname)
+f = Figlet(width=80)
+hostname = '.'.join(node.hostname.split('.')[:-3])
+domainname = '.'.join(node.hostname.split('.')[-2:])
 
-files = {}
+# generate Message Of the Day
+motd = node.metadata.get('motd', [])
 
-if node.metadata.get('motd', False):
-    files["/etc/motd"] = {
-        'content': node.metadata['motd'],
-        'content_type': 'jinja2',
+if not isinstance(motd, list):
+    motd = motd.split('\n')
+
+motd += f.renderText(hostname).split('\n')
+motd += [f'Hostname: {node.hostname}', ]
+
+issue = f.renderText(domainname).split('\n')
+issue += f.renderText(str(node.os).capitalize() + str(node.os_version[0])).split('\n')
+
+issue += [
+    "Hostname: \\n",
+    "TTY: \\l",
+    "IP: \\4",
+    "",
+]
+
+files = {
+    "/etc/motd": {
+        'content': '\n'.join(motd) + '\n',
         'owner': "root",
         'group': "root",
         'mode': "0644",
-        'context': {'figlet': figlet.split('\n')},
-    }
-else:
-    files["/etc/motd"] = {
-        'source': "motd_template",
-        'content_type': 'jinja2',
+    },
+    '/etc/issue': {
+        'content': '\n'.join(issue) + '\n',
         'owner': "root",
         'group': "root",
         'mode': "0644",
-        'context': {'figlet': figlet.split('\n')},
     }
+}
