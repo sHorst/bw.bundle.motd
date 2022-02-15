@@ -13,8 +13,8 @@ if not isinstance(motd, list):
 motd += f.renderText(hostname).split('\n')
 motd += [f'Hostname: {node.hostname}', ]
 
-issue = f.renderText(domainname).split('\n')
-issue += f.renderText(str(node.os).capitalize() + str(node.os_version[0])).split('\n')
+issue = f.renderText(domainname).replace('\\', '\\\\').split('\n')
+issue += f.renderText(str(node.os).capitalize() + str(node.os_version[0])).replace('\\', '\\\\').split('\n')
 
 issue += [
     "Hostname: \\n",
